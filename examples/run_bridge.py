@@ -4,14 +4,13 @@ import os
 import yaml
 
 # have to import cyber first or debug output is buggy
-from cyber_py import cyber
+# from cyber_py import cyber
 import carla
 
 from carla_cyber_bridge.bridge import CarlaCyberBridge
 
 if __name__ == '__main__':
     DESCRIPTION = "Sample python script to run carla-apollo bridge."
-
     PARSER = argparse.ArgumentParser(description=DESCRIPTION,
         formatter_class=argparse.RawTextHelpFormatter)
 

@@ -9,10 +9,12 @@
 handle a object sensor
 """
 import carla
+import math
 
 from modules.perception.proto.perception_obstacle_pb2 import PerceptionObstacle, PerceptionObstacles
 
-# TODO: hacky: since this isn't an interface to an actual Carla sensor, it's being 
+
+# TODO: hacky: since this isn't an interface to an actual Carla sensor, it's being
 # instantiated using the bridge constructor's params dict.
 class ObjectSensor(object):
     def __init__(self, ego_vehicle):
@@ -24,6 +26,7 @@ class ObjectSensor(object):
         self.range = params.get("range") or 100
         self.channel_name = params.get("channel_name") or "/apollo/perception/obstacles"
         self.callback_id = self.bridge.carla_world.on_tick(self.on_tick)
+        self.world_snapshot = self.bridge.carla_world.get_snapshot()
 
     def __del__(self):
         self.bridge.carla_world.remove_on_tick(self.callback_id)
@@ -34,6 +37,8 @@ class ObjectSensor(object):
 
         """
         self.seconds_since_write += world_snapshot.delta_seconds
+
+        actor_vel = 15
         if self.seconds_since_write >= self.tick_rate:
             self.seconds_since_write -= self.tick_rate
             obstacles = PerceptionObstacles()
@@ -42,7 +47,11 @@ class ObjectSensor(object):
                 if actor.carla_actor is not self.parent_actor:
                     if actor.carla_actor.get_location().distance(self.parent_actor.get_location()) <= self.range:
                         if isinstance(actor.carla_actor, carla.Vehicle):
-                            obstacles.perception_obstacle.append(actor.get_cyber_obstacle_msg())
+                            actor_cyber_msg = actor.get_cyber_obstacle_msg()
+                            actor_cyber_msg.velocity.x = actor_vel*math.cos(math.radians(actor.carla_actor.get_transform().rotation.yaw))
+                            actor_cyber_msg.velocity.y = -actor_vel*math.sin(math.radians(actor.carla_actor.get_transform().rotation.yaw))
+                            actor_cyber_msg.velocity.z = 0
+                            obstacles.perception_obstacle.append(actor_cyber_msg)
                         elif isinstance(actor.carla_actor, carla.Walker):
                             msg = actor.get_cyber_obstacle_msg()
                             msg.type = PerceptionObstacle.Type.PEDESTRIAN

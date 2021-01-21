@@ -50,13 +50,21 @@ import glob
 import os
 import sys
 
+# try:
+#     sys.path.append(glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
+#         sys.version_info.major,
+#         sys.version_info.minor,
+#         'win-amd64' if os.name == 'nt' else 'linux-x86_64'))[0])
+# except IndexError:
+#     pass
+
 try:
-    sys.path.append(glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
+    sys.path.append(glob.glob('home/vericav/Downloads/CARLA_0.9.9.4/PythonAPI/carla/dist/carla-*%d.%d-%s.egg' % (
         sys.version_info.major,
-        sys.version_info.minor,
+        5,
         'win-amd64' if os.name == 'nt' else 'linux-x86_64'))[0])
 except IndexError:
-    pass
+    print("IndexError")
 
 
 # ==============================================================================
@@ -174,6 +182,7 @@ class World(object):
         if self.player is not None:
             spawn_point = self.player.get_transform()
             spawn_point.location.z += 2.0
+
             spawn_point.rotation.roll = 0.0
             spawn_point.rotation.pitch = 0.0
             self.destroy()
@@ -181,6 +190,7 @@ class World(object):
         while self.player is None:
             spawn_points = self.map.get_spawn_points()
             spawn_point = random.choice(spawn_points) if spawn_points else carla.Transform()
+            spawn_point
             self.player = self.world.try_spawn_actor(blueprint, spawn_point)
         # Set up the sensors.
         self.collision_sensor = CollisionSensor(self.player, self.hud)
@@ -833,7 +843,7 @@ def main():
     argparser.add_argument(
         '--host',
         metavar='H',
-        default='172.17.0.1',
+        default='127.0.0.1',
         help='IP of the host server (default: 172.17.0.1)')
     argparser.add_argument(
         '-p', '--port',

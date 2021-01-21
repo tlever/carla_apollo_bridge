@@ -11,7 +11,7 @@ setuptools.setup(
     python_requires='>=2.7',
     install_requires=[
         'numpy',
-        'opencv-python',
+        'opencv-python==4.2.0.32',
         'protobuf',
         'pygame',
         'pyproj',
